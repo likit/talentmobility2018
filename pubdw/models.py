@@ -1,4 +1,4 @@
-from sqlalchemy import Table, Column, Integer, String, Date, ForeignKey
+from sqlalchemy import Table, Column, Integer, String, Date, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 from sqlalchemy.types import JSON
 from sqlalchemy.ext.declarative import declarative_base
@@ -14,6 +14,11 @@ AuthorEmailTable = Table('author_email_table', Base.metadata,
                        Column('author_id', Integer, ForeignKey('authors.id')),
                        Column('email_id', Integer, ForeignKey('emails.id'))
                        )
+
+AuthorAffilTable = Table('author_affil_table', Base.metadata,
+                         Column('author_id', Integer, ForeignKey('authors.id')),
+                         Column('affil_id', Integer, ForeignKey('affils.id'))
+                         )
 
 
 class Pub(Base):
@@ -38,11 +43,39 @@ class Author(Base):
     firstname_th = Column(String())
     lastname_th = Column(String())
     emails = relationship('Email',
-                           secondary=PubAuthorTable,
+                           secondary=AuthorEmailTable,
                            backref='authors')
+    affils = relationship('Affiliation',
+                          secondary=AuthorAffilTable,
+                          backref='authors')
 
 
 class Email(Base):
     __tablename__ = 'emails'
     id = Column(Integer(), primary_key=True)
     email = Column(String())
+
+
+class Degree(Base):
+    __tablename__ = 'degrees'
+    id = Column(Integer(), primary_key=True)
+    title = Column(String(), nullable=False)
+    level = Column(Integer())
+
+
+class ScholarshipStudent(Base):
+    __tablename__ = 'scholarship_students'
+    id = Column(Integer(), primary_key=True)
+    author_id = Column(Integer(), ForeignKey('authors.id'))
+    country = Column(String())
+    status = Column(Boolean())
+    field_of_study = Column(String())
+    specialty = Column(String())
+    degree_id = Column(Integer(), ForeignKey('degrees.id'))
+
+
+class Affiliation(Base):
+    __tablename__ = 'affils'
+    id = Column(Integer(), primary_key=True)
+    name = Column(String())
+    city = Column(String())
